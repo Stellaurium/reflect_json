@@ -87,7 +87,10 @@ add_custom_target(run
         COMMENT "Running ${project_name}..."
         )
 
-# 进行Cmake测试
-enable_testing()
-add_test(NAME run_${project_name}_test COMMAND ${project_name}_test)
-
+# 自定义目标 'run'，它在构建后运行可执行文件
+add_custom_target(test
+        COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${project_name}_test
+        DEPENDS ${project_name}_test
+        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMENT "Run Testing of ${project_name}..."
+        )

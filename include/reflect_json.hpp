@@ -7,21 +7,33 @@
 #include <string>
 // =====================================
 
+// 这个实在是太精妙了
+#define PP_REMOVE_PARENTHESES_IF_EXIST(X)                                      \
+    __PP_REMOVE_PARENTHESES_IMPL(__PP_ISH X)
+#define __PP_ISH(...) __PP_ISH __VA_ARGS__
+// 套一层保证优先级
+#define __PP_REMOVE_PARENTHESES_IMPL(...)                                      \
+    __PP_REMOVE_PARENTHESES_IMPL2(__VA_ARGS__)
+#define __PP_REMOVE_PARENTHESES_IMPL2(...) __PP_VAN##__VA_ARGS__
+#define __PP_VAN__PP_ISH // VANISH
+
 // basic macro
 // __VA_ARGS__ 是下面 Type 的参数
 // 因此可以实现在类外仍然可以定义一个 __REFLECT_OUT_CLASS_BEGIN 即可
 // 如果类型是类似于 Type<double>的
 // type<T> 会自动推导
-#define __REFLECT_OUT_CLASS_BEGIN(Type, ...)                                     \
+#define __REFLECT_OUT_CLASS_BEGIN(Type, ...)                                   \
     template <__VA_ARGS__>                                                     \
-    struct __reflect_trait<Type> {                                               \
+    struct __reflect_trait<PP_REMOVE_PARENTHESES_IF_EXIST(Type)> {             \
         template <typename Func>                                               \
-        static constexpr void for_each_member(Type &object, Func &&func) {
+        static constexpr void                                                  \
+        for_each_member(PP_REMOVE_PARENTHESES_IF_EXIST(Type) & object,         \
+                        Func &&func) {
 
-#define __REFLECT_OUT_CLASS_ELEMENT(element_name)                                \
+#define __REFLECT_OUT_CLASS_ELEMENT(element_name)                              \
     func(#element_name, object.element_name);
 
-#define __REFLECT_OUT_CLASS_END()                                                \
+#define __REFLECT_OUT_CLASS_END()                                              \
     }                                                                          \
     }                                                                          \
     ;
@@ -37,14 +49,13 @@
 // 这里面的TYPE必须加括号，且只能由一个括号，后面要用这个括号直接当函数的调用运算符
 // 我们希望延迟展开这个整体，而不是最初就展开
 #define REFLECT_OUT_CLASS_TEMPLATE(Type, ...)                                  \
-    __REFLECT_OUT_CLASS_BEGIN Type PP_FOR_EACH(                              \
-        __REFLECT_OUT_CLASS_ELEMENT,        \
-                                             PP_EMPTY_SEPARATOR, __VA_ARGS__)            \
+    __REFLECT_OUT_CLASS_BEGIN Type PP_FOR_EACH(                                \
+        __REFLECT_OUT_CLASS_ELEMENT, PP_EMPTY_SEPARATOR, __VA_ARGS__)          \
         __REFLECT_OUT_CLASS_END()
 
 //  在类的内部使用，不需要指明类的名称，只需要写入需要序列化的内容即可
 
-#define __REFLECT_IN_CLASS_BEGIN()                                               \
+#define __REFLECT_IN_CLASS_BEGIN()                                             \
     template <typename Func>                                                   \
     void for_each_member(Func &&func) {
 

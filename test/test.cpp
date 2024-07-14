@@ -1,6 +1,7 @@
 #include "reflect_json.hpp"
 
 #include <catch2/catch_all.hpp>
+#include <fmt/format.h>
 
 constexpr double eps = 1e-8;
 
@@ -32,15 +33,71 @@ class NormalClassWithReflectInClass {
     std::string name;
     double balance;
     int age;
-    //    std::vector<int> int_list;
-    REFLECT_IN_CLASS(name, balance, age)
+    std::vector<int> int_list;
+    REFLECT_IN_CLASS(name, balance, age, int_list)
 };
+
 class NormalClassWithReflectOutClass {
   public:
     std::string name;
     double balance;
     int age;
-    //    std::vector<int> int_list;
+    std::vector<int> int_list;
+};
+REFLECT_OUT_CLASS(NormalClassWithReflectOutClass, name, balance, age)
+
+template <typename T>
+class TemplateClassWithReflectInClass {
+  public:
+    std::string name;
+    T value;
+    REFLECT_IN_CLASS(name, value);
 };
 
-TEST_CASE("test reflect", "[reflect]") {}
+template <typename T>
+class TemplateClassWithReflectOutClass {
+  public:
+    std::string name;
+    T value;
+};
+REFLECT_OUT_CLASS_TEMPLATE((TemplateClassWithReflectOutClass<T>, typename T),
+                           name, value);
+
+template <typename T, typename W>
+class Template2ClassWithReflectInClass {
+  public:
+    T a;
+    W b;
+    REFLECT_IN_CLASS(a, b);
+};
+
+template <typename T, typename W>
+class Template2ClassWithReflectOutClass {
+  public:
+    T a;
+    W b;
+};
+REFLECT_OUT_CLASS_TEMPLATE(((Template2ClassWithReflectOutClass<T, W>),
+                            typename T, typename W),
+                           a, b);
+
+TEST_CASE("test reflect", "[reflect]") {
+    auto in_class = NormalClassWithReflectInClass{"Way", 123.41, 54, {1, 2, 3}};
+    auto in_class_string = serialize(in_class);
+    fmt::println("{}", in_class_string);
+
+    auto out_class = NormalClassWithReflectOutClass{"Jay", 12.6, 16, {3, 4, 1}};
+    auto out_class_string = serialize(out_class);
+    fmt::println("{}", out_class_string);
+
+    auto template_in_class1 =
+        TemplateClassWithReflectInClass{"template_in", 123.4};
+    auto template_in_class1_string = serialize(template_in_class1);
+    fmt::println("{}", template_in_class1_string);
+
+    auto template_in_class2 =
+        TemplateClassWithReflectOutClass<std::vector<int>>{"template_out",
+                                                           {1, 2, 3, 4}};
+    auto template_in_class2_string = serialize(template_in_class2);
+    fmt::println("{}", template_in_class2_string);
+}

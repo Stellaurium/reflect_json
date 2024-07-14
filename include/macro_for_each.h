@@ -6,6 +6,12 @@
 // =====================================
 // 定义一些工具
 
+// 去掉括号，使用方法就是 PP_REMOVE_PARENTHESES variable
+// 其中 variable 带着括号，就直接变成函数调用了
+//#define PP_REMOVE_PARENTHESES(...) __VA_ARGS__
+
+#define PP_EXPAND(x) x
+
 // 这个定义是为了正确处理函数的参数的匹配
 // 具体见Obsidian
 // 解析宏调用时，宏参数不会展开。
