@@ -25,5 +25,10 @@ int main() {
     fmt::print("{}\n", serialize(person1));
     fmt::print("{}\n", serialize(person2));
 
+    auto var = deserialize<Person<double>>(serialize(person1));
+    static_assert(std::is_same_v < double, decltype(var.balance)>);
+    fmt::print("name: {}, age: {}, city: {}, balance: {}\n", var.name, var.age,
+               var.city, var.balance);
+
     return 0;
 }

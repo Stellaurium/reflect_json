@@ -25,6 +25,7 @@
 #define __REFLECT_OUT_CLASS_BEGIN(Type, ...)                                   \
     template <__VA_ARGS__>                                                     \
     struct __reflect_trait<PP_REMOVE_PARENTHESES_IF_EXIST(Type)> {             \
+        static constexpr bool have_for_each_member() { return true; };         \
         template <typename Func>                                               \
         static constexpr void                                                  \
         for_each_member(PP_REMOVE_PARENTHESES_IF_EXIST(Type) & object,         \
@@ -73,6 +74,12 @@
 // 用模板的特化来实现每一个类型的序列化方法
 template <typename T>
 struct __reflect_trait {
+    static constexpr bool have_for_each_member() {
+        return requires(T t) {
+            t.for_each_member([](const std::string str, auto & value) {});
+        };
+    }
+
     template <typename Func>
     static constexpr void for_each_member(T &object, Func &&func) {
         object.for_each_member(std::forward<Func>(func));
@@ -105,12 +112,55 @@ struct __reflect_trait {
 // 序列化
 using json = nlohmann::json;
 
+// Serialization for types with for_each_member
 template <typename T>
-std::string serialize(T &object) {
+    requires (__reflect_trait<T>::have_for_each_member())
+json serialize_json(T &object) {
     json root;
     __reflect_trait<T>::for_each_member(
-        object,
-        [&](const std::string &key, auto &value) { root[key] = value; });
+        object, [&](const std::string &key, auto &value) {
+            root[key] = serialize_json(value);
+        });
+    return root;
+}
 
-    return root.dump(4);
+// Serialization for other types
+template <typename T>
+    requires(!__reflect_trait<T>::have_for_each_member())
+json serialize_json(T &object) {
+    return object;
+}
+
+template <typename T>
+std::string serialize(T &&object) {
+    return serialize_json(std::forward<T>(object)).dump(4);
+}
+
+template <typename T>
+    requires (__reflect_trait<T>::have_for_each_member())
+std::decay_t<T> deserialize_json(json &json_value) {
+    std::decay_t<T> object;
+
+    __reflect_trait<std::decay_t<T>>::for_each_member(
+        object, [&](const std::string &key, auto &value) {
+            if (json_value.contains(key)) {
+                // 这个的返回值可能是一个json
+                value = deserialize_json<std::decay_t<decltype(value)>>(
+                    json_value[key]);
+            }
+        });
+
+    return object;
+}
+
+template <typename T>
+    requires(!__reflect_trait<T>::have_for_each_member())
+T deserialize_json(json &json_value) {
+    return json_value.get<std::decay_t<T>>();
+}
+
+template <typename T>
+std::decay_t<T> deserialize(std::string stream) {
+    json root = json::parse(stream);
+    return deserialize_json<std::decay_t<T>>(root);
 }
