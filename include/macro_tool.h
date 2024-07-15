@@ -1,6 +1,6 @@
 #pragma once
 
-#define PP_EXPAND(x) x
+#define PP_EXPAND(...) __VA_ARGS__
 
 // 这个定义是为了正确处理函数的参数的匹配
 // 具体见Obsidian

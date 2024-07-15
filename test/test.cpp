@@ -1,7 +1,11 @@
-#include "reflect_json.hpp"
+#include "macro_count.h"
+#include "macro_for_each.h"
+#include "macro_tool.h"
+#include "reflect.hpp"
 
 #include <catch2/catch_all.hpp>
 #include <fmt/format.h>
+#include <nlohmann/json.hpp>
 
 constexpr double eps = 1e-8;
 
@@ -26,10 +30,35 @@ TEST_CASE("test macro", "[macro]") {
             {42, 24}, {12.321}, {std::string("hello")}};
 
         REQUIRE(std::get<0>(var) == std::vector<int>{42, 24});
-        REQUIRE_THAT(std::get<1>(var)[0], Catch::Matchers::WithinRel(12.32, eps));
+        REQUIRE_THAT(std::get<1>(var)[0], Catch::Matchers::WithinRel(12.321, eps));
         REQUIRE(std::get<2>(var) == std::vector<std::string>{"hello"});
     }
 }
+
+class Person {
+  public:
+    std::string name;
+    int age;
+};
+REFLECT_OUT_CLASS(Person, name, age);
+
+using json = nlohmann::json;
+
+template <typename T>
+std::string serialize(const T &object) {
+    json root;
+    // 传递的都是指针 可以使用 只能使用auto 不需要引用
+    reflect::for_each_member(object, [&](const std::string &key, const auto &value) { root[key] = value; });
+    //    reflect::__reflect_trait<Person>::for_each_member_ptr([&](const std::string &key, auto ptr) { root[key] =
+    //    object.*ptr; });
+    return root.dump(4);
+}
+
+TEST_CASE("v2.0 test serialization") {
+    Person person{"Jay", 12};
+    fmt::println("{}", serialize(person));
+}
+
 //
 // template <typename T>
 // class Address {
