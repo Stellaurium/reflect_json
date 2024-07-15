@@ -6,3 +6,4 @@ https://github.com/archibate/reflect-hpp
 目的是可以实现c++的自动序列化和反序列化
 
 
+v2.0 版本删掉了 教程一般的注释，如果未来可能看不懂代码了，看v1.0版本的注释进行回忆

@@ -9,13 +9,7 @@
 #include <string>
 // =====================================
 
-// 这个实在是太精妙了
-#define PP_REMOVE_PARENTHESES_IF_EXIST(X) __PP_REMOVE_PARENTHESES_IMPL(__PP_ISH X)
-#define __PP_ISH(...) __PP_ISH __VA_ARGS__
-// 套一层保证优先级
-#define __PP_REMOVE_PARENTHESES_IMPL(...) __PP_REMOVE_PARENTHESES_IMPL2(__VA_ARGS__)
-#define __PP_REMOVE_PARENTHESES_IMPL2(...) __PP_VAN##__VA_ARGS__
-#define __PP_VAN__PP_ISH // VANISH
+
 
 // basic macro
 // __VA_ARGS__ 是下面 Type 的参数
