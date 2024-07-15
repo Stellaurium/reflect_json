@@ -10,4 +10,3 @@
 #define PP_FOR_EACH(func, brackets, separator, ...)                                                                    \
     PP_CONCAT(__PP_FOR_EACH_, PP_COUNT(__VA_ARGS__))                                                                   \
     (func, brackets, separator, __VA_ARGS__)
-
