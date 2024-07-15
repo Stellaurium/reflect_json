@@ -8,7 +8,7 @@
 
 // 去掉括号，使用方法就是 PP_REMOVE_PARENTHESES variable
 // 其中 variable 带着括号，就直接变成函数调用了
-//#define PP_REMOVE_PARENTHESES(...) __VA_ARGS__
+// #define PP_REMOVE_PARENTHESES(...) __VA_ARGS__
 
 #define PP_EXPAND(x) x
 
@@ -59,26 +59,23 @@
 // 然后REVERSE_64_NUMBER并不会展开 会被直接匹配到 _i 参数中的一个
 // 从而导致了错误
 // 方案二： 使用CALL，来强制展开函数的所有参数
-#define __PP_COUNT_IMPL(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13,  \
-                      _14, _15, ___PP_FOR_EACH16, _17, _18, _19, _20, _21, _22, _23, _24,   \
-                      _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35,   \
-                      _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46,   \
-                      _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57,   \
-                      _58, _59, _60, _61, _62, _63, _64, N, ...)               \
-  N
+#define __PP_COUNT_IMPL(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, ___PP_FOR_EACH16, _17, _18,  \
+                        _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, \
+                        _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, \
+                        _57, _58, _59, _60, _61, _62, _63, _64, N, ...)                                                \
+    N
 
 // 注意 沙比 CLion 不会展开，他展开的可能是错误的
 // 下面是两种方案
 // #define PP_COUNT_IMPL1(...) PP_COUNT_IMPL2(__VA_ARGS__)
 // #define PP_COUNT(...)
 //  PP_COUNT_IMPL1(__VA_ARGS__ __VA_OPT__(, ) REVERSE_64_NUMBER)
-#define PP_COUNT(...)                                                          \
-  PP_CALL(__PP_COUNT_IMPL, __VA_ARGS__ __VA_OPT__(, ) REVERSE_64_NUMBER)
+#define PP_COUNT(...) PP_CALL(__PP_COUNT_IMPL, __VA_ARGS__ __VA_OPT__(, ) REVERSE_64_NUMBER)
 
 // 以下两种方式都行，都是为了解决求值顺序的问题
-#define PP_FOR_EACH(func, separator, ...)                                      \
-  PP_CALL(__PP_CONCAT_IMPL, __PP_FOR_EACH_, PP_COUNT(__VA_ARGS__))                 \
-  (func, separator, __VA_ARGS__)
+#define PP_FOR_EACH(func, separator, ...)                                                                              \
+    PP_CALL(__PP_CONCAT_IMPL, __PP_FOR_EACH_, PP_COUNT(__VA_ARGS__))                                                   \
+    (func, separator, __VA_ARGS__)
 // #define PP_FOR_EACH(func, separator, ...)
 //   PP_CONCAT(__PP_FOR_EACH_, PP_COUNT(__VA_ARGS__))(func, separator,
 //   __VA_ARGS__)

@@ -162,7 +162,7 @@ TEST_CASE("test reflect", "[reflect]") {
 
     SECTION("sub class") {
         auto template2_sub_class_in_class = Template2ClassWithSubClassWithReflectInClass<std::string, size_t>{
-            "hello", 123, Address<std::string>{"Bejing", 12}};
+            "hello", 123, Address<std::string>{"Beijing", 12}};
         auto template2_sub_class_in_class_string = serialize(template2_sub_class_in_class);
         fmt::println("{}", template2_sub_class_in_class_string);
         REQUIRE(template2_sub_class_in_class ==
@@ -170,7 +170,7 @@ TEST_CASE("test reflect", "[reflect]") {
 
         auto template2_sub_class_out_class =
             Template2ClassWithSubClassWithReflectOutClass<std::string, size_t, std::string>{
-                "hello", 123, {"Bejing", 12}};
+                "hello", 123, {"Beijing", 12}};
         auto template2_sub_class_out_class_string = serialize(template2_sub_class_out_class);
         fmt::println("{}", template2_sub_class_out_class_string);
         REQUIRE(template2_sub_class_out_class ==
