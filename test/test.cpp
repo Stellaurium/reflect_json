@@ -23,6 +23,17 @@ TEST_CASE("test macro", "[macro]") {
     }
 }
 
+template <typename T>
+class Address {
+  public:
+    T address;
+    int count;
+    // Constructor
+
+    bool operator==(const Address &) const = default;
+    REFLECT_IN_CLASS(address, count);
+};
+
 class NormalClassWithReflectInClass {
   public:
     std::string name;
@@ -79,65 +90,91 @@ class Template2ClassWithReflectOutClass {
 };
 REFLECT_OUT_CLASS_TEMPLATE(((Template2ClassWithReflectOutClass<T, W>), typename T, typename W), a, b);
 
+template <typename T, typename W>
+class Template2ClassWithSubClassWithReflectInClass {
+  public:
+    T a;
+    W b;
+    Address<std::string> address_in_class;
+    bool operator==(const Template2ClassWithSubClassWithReflectInClass &) const = default;
+    REFLECT_IN_CLASS(a, b, address_in_class);
+};
+
+template <typename T, typename W, typename U>
+class Template2ClassWithSubClassWithReflectOutClass {
+  public:
+    T a;
+    W b;
+    Address<U> address_in_class;
+    bool operator==(const Template2ClassWithSubClassWithReflectOutClass &) const = default;
+};
+REFLECT_OUT_CLASS_TEMPLATE(((Template2ClassWithSubClassWithReflectOutClass<T, W, U>), typename T, typename W,
+                            typename U),
+                           a, b, address_in_class);
+
 TEST_CASE("test reflect", "[reflect]") {
-//        SECTION("basic class") {
-//            auto in_class =
-//                NormalClassWithReflectInClass{"Way", 123.41, 54, {1, 2, 3}};
-//            auto in_class_string = serialize(in_class);
-//            fmt::println("{}", in_class_string);
-//            REQUIRE(in_class ==
-//            deserialize<decltype(in_class)>(in_class_string));
-//
-//            auto out_class =
-//                NormalClassWithReflectOutClass{"Jay", 12.6, 16, {3, 4, 1}};
-//            auto out_class_string = serialize(out_class);
-//            fmt::println("{}", out_class_string);
-//            REQUIRE(out_class ==
-//                    deserialize<decltype(out_class)>(out_class_string));
-//        }
-//
-//        SECTION("1 para template") {
-//            auto template_in_class1 =
-//                TemplateClassWithReflectInClass<double>{"template_in", 123.4};
-//            auto template_in_class1_string = serialize(template_in_class1);
-//            fmt::println("{}", template_in_class1_string);
-//            REQUIRE(template_in_class1 ==
-//            deserialize<decltype(template_in_class1)>(
-//                                              template_in_class1_string));
-//
-//            auto template_in_class2 =
-//                TemplateClassWithReflectOutClass<std::vector<int>>{"template_out",
-//                                                                   {1, 2, 3,
-//                                                                   4}};
-//            auto template_in_class2_string = serialize(template_in_class2);
-//            fmt::println("{}", template_in_class2_string);
-//            REQUIRE(template_in_class2 ==
-//            deserialize<decltype(template_in_class2)>(
-//                                              template_in_class2_string));
-//        }
-//
-//        SECTION("2 para template") {
-//            auto template2_in_class =
-//                Template2ClassWithReflectInClass<double, std::string>{12.3,
-//                "say"};
-//            auto template2_in_class_string = serialize(template2_in_class);
-//            fmt::println("{}", template2_in_class_string);
-//            REQUIRE(
-//                template2_in_class ==
-//                deserialize<Template2ClassWithReflectInClass<double,
-//                std::string>>(
-//                    template2_in_class_string));
-//
-//            auto template2_out_class =
-//                Template2ClassWithReflectOutClass<std::string,
-//                size_t>{"hello",
-//                                                                       123};
-//            auto template2_out_class_string = serialize(template2_out_class);
-//            fmt::println("{}", template2_out_class_string);
-//            REQUIRE(template2_out_class ==
-//                    deserialize<decltype(template2_out_class)>(
-//                        template2_out_class_string));
-//        }
+    SECTION("basic class") {
+        auto in_class = NormalClassWithReflectInClass{"Way", 123.41, 54, {1, 2, 3}};
+        auto in_class_string = serialize(in_class);
+        fmt::println("{}", in_class_string);
+        auto de_in_class = deserialize<decltype(in_class)>(in_class_string);
+        REQUIRE(in_class == deserialize<decltype(in_class)>(in_class_string));
+        REQUIRE(in_class.name == de_in_class.name);
+        REQUIRE(in_class.age == de_in_class.age);
+        REQUIRE(in_class.balance == de_in_class.balance);
+        REQUIRE(in_class.int_list == de_in_class.int_list);
+
+        auto out_class = NormalClassWithReflectOutClass{"Jay", 12.6, 16, {3, 4, 1}};
+        auto out_class_string = serialize(out_class);
+        fmt::println("{}", out_class_string);
+        auto de_out_class = deserialize<NormalClassWithReflectOutClass>(out_class_string);
+        REQUIRE(out_class == deserialize<decltype(out_class)>(out_class_string));
+        CHECK(out_class.name == de_out_class.name);
+        CHECK(out_class.age == de_out_class.age);
+        CHECK(out_class.balance == de_out_class.balance);
+        CHECK(out_class.int_list == de_out_class.int_list);
+    }
+
+    SECTION("1 para template") {
+        auto template_in_class1 = TemplateClassWithReflectInClass<double>{"template_in", 123.4};
+        auto template_in_class1_string = serialize(template_in_class1);
+        fmt::println("{}", template_in_class1_string);
+        REQUIRE(template_in_class1 == deserialize<decltype(template_in_class1)>(template_in_class1_string));
+
+        auto template_in_class2 = TemplateClassWithReflectOutClass<std::vector<int>>{"template_out", {1, 2, 3, 4}};
+        auto template_in_class2_string = serialize(template_in_class2);
+        fmt::println("{}", template_in_class2_string);
+        REQUIRE(template_in_class2 == deserialize<decltype(template_in_class2)>(template_in_class2_string));
+    }
+
+    SECTION("2 para template") {
+        auto template2_in_class = Template2ClassWithReflectInClass<double, std::string>{12.3, "say"};
+        auto template2_in_class_string = serialize(template2_in_class);
+        fmt::println("{}", template2_in_class_string);
+        REQUIRE(template2_in_class ==
+                deserialize<Template2ClassWithReflectInClass<double, std::string>>(template2_in_class_string));
+
+        auto template2_out_class = Template2ClassWithReflectOutClass<std::string, size_t>{"hello", 123};
+        auto template2_out_class_string = serialize(template2_out_class);
+        fmt::println("{}", template2_out_class_string);
+        REQUIRE(template2_out_class == deserialize<decltype(template2_out_class)>(template2_out_class_string));
+    }
+
+    SECTION("sub class") {
+        auto template2_sub_class_in_class = Template2ClassWithSubClassWithReflectInClass<std::string, size_t>{
+            "hello", 123, Address<std::string>{"Bejing", 12}};
+        auto template2_sub_class_in_class_string = serialize(template2_sub_class_in_class);
+        fmt::println("{}", template2_sub_class_in_class_string);
+        REQUIRE(template2_sub_class_in_class ==
+                deserialize<decltype(template2_sub_class_in_class)>(template2_sub_class_in_class_string));
+
+        auto template2_sub_class_out_class = Template2ClassWithSubClassWithReflectOutClass<std::string, size_t,std::string>{
+            "hello", 123, {"Bejing", 12}};
+        auto template2_sub_class_out_class_string = serialize(template2_sub_class_out_class);
+        fmt::println("{}", template2_sub_class_out_class_string);
+        REQUIRE(template2_sub_class_out_class ==
+                deserialize<decltype(template2_sub_class_out_class)>(template2_sub_class_out_class_string));
+    }
 }
 #define IF_HAVE_FOR_EACH_MEMBER(...) __reflect_trait<__VA_ARGS__>::have_for_each_member()
 TEST_CASE("test concept of has for_each_member", "[concept]") {
@@ -145,12 +182,26 @@ TEST_CASE("test concept of has for_each_member", "[concept]") {
     REQUIRE(IF_HAVE_FOR_EACH_MEMBER(NormalClassWithReflectInClass));
     REQUIRE(!IF_HAVE_FOR_EACH_MEMBER(std::string));
     REQUIRE(!IF_HAVE_FOR_EACH_MEMBER(int));
+    REQUIRE(!IF_HAVE_FOR_EACH_MEMBER(int &));
+    REQUIRE(!IF_HAVE_FOR_EACH_MEMBER(int &&));
     REQUIRE(!IF_HAVE_FOR_EACH_MEMBER(std::vector<int>));
     REQUIRE(!IF_HAVE_FOR_EACH_MEMBER(std::map<std::string, int>));
 }
 
-TEST_CASE("test serialize"){
-    REQUIRE(!__reflect_trait<std::string>::have_for_each_member());
-//    serialize_json(std::string("hello"));
-    serialize_json(123);
+TEST_CASE("test serialize") {
+    SECTION("serialize") {
+        REQUIRE(!__reflect_trait<std::string>::have_for_each_member());
+        fmt::print("{}\n", serialize(123));
+        serialize_json(std::string("hello"));
+        auto s = std::string("hello");
+        serialize_json(s);
+        fmt::print("{}\n", serialize(std::string("hello")));
+    }
+    int a = 2;
+    SECTION("deserialize") {
+        REQUIRE(deserialize_json<int>(json(1)) == 1);
+        REQUIRE(deserialize_json<int>(json(a)) == a);
+        REQUIRE(deserialize_json<int>(serialize_json(a)) == a);
+        REQUIRE(deserialize_json<int>(serialize_json(a)) == a);
+    }
 }
