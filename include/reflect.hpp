@@ -70,6 +70,18 @@ struct __reflect_trait {
     }
 };
 
+template <typename T>
+struct is_member_object_pointer_helper : std::false_type {};
+
+template <typename ClassType, typename MemberType>
+struct is_member_object_pointer_helper<MemberType ClassType::*> : std::true_type {};
+
+template <typename T>
+using is_member_object_pointer = is_member_object_pointer_helper<std::decay_t<T>>;
+
+template <typename T>
+constexpr bool is_member_object_pointer_v = is_member_object_pointer<T>::value;
+
 // template <class T, class Func>
 // struct _foreach_visitor {
 //     T &&object;
@@ -104,15 +116,18 @@ void for_each_member(T &&object, Func &&func) {
         [object_cap = std::tuple<T>(std::forward<T>(object)), func_cap = std::tuple<Func>(std::forward<Func>(func))]
         //        [&object = object, func = std::forward<Func>(func)]
         (const std::string &key, auto ptr) {
-            // TODO 添加 只有在ptr是成员指针的时候才运行下面代码
-            (get<0>(func_cap))(key, (get<0>(object_cap)).*ptr);
+            if constexpr (is_member_object_pointer_v<decltype(ptr)>) {
+                (get<0>(func_cap))(key, (get<0>(object_cap)).*ptr);
+            }
         });
 
     //    //     ERROR
     //    __reflect_trait<std::decay_t<T>>::for_each_member_ptr(
     //        [object = std::forward<T>(object), func = std::forward<Func>(func)](const std::string &key, auto ptr) {
-    //            // TODO 添加 只有在ptr是成员指针的时候才运行下面代码
+    //        if constexpr (is_member_object_pointer_v<T>) {
     //            func(key, object.*ptr);
+    //        }
+    //        }
     //        });
 }
 
