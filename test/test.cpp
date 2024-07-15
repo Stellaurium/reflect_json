@@ -168,14 +168,16 @@ TEST_CASE("test reflect", "[reflect]") {
         REQUIRE(template2_sub_class_in_class ==
                 deserialize<decltype(template2_sub_class_in_class)>(template2_sub_class_in_class_string));
 
-        auto template2_sub_class_out_class = Template2ClassWithSubClassWithReflectOutClass<std::string, size_t,std::string>{
-            "hello", 123, {"Bejing", 12}};
+        auto template2_sub_class_out_class =
+            Template2ClassWithSubClassWithReflectOutClass<std::string, size_t, std::string>{
+                "hello", 123, {"Bejing", 12}};
         auto template2_sub_class_out_class_string = serialize(template2_sub_class_out_class);
         fmt::println("{}", template2_sub_class_out_class_string);
         REQUIRE(template2_sub_class_out_class ==
                 deserialize<decltype(template2_sub_class_out_class)>(template2_sub_class_out_class_string));
     }
 }
+
 #define IF_HAVE_FOR_EACH_MEMBER(...) __reflect_trait<__VA_ARGS__>::have_for_each_member()
 TEST_CASE("test concept of has for_each_member", "[concept]") {
     REQUIRE(IF_HAVE_FOR_EACH_MEMBER(NormalClassWithReflectOutClass));
