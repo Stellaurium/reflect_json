@@ -113,11 +113,11 @@ void for_each_member(T &&object, Func &&func) {
 
     // 奇怪的写法 https://stackoverflow.com/questions/26831382/capturing-perfectly-forwarded-variable-in-lambda
     __reflect_trait<std::decay_t<T>>::for_each_member_ptr(
-        [object_cap = std::tuple<T>(std::forward<T>(object)), func_cap = std::tuple<Func>(std::forward<Func>(func))]
-        //        [&object = object, func = std::forward<Func>(func)]
+//        [object_cap = std::tuple<T>(std::forward<T>(object)), func_cap = std::tuple<Func>(std::forward<Func>(func))]
+        [capture = std::tuple<T,Func>(std::forward<T>(object),std::forward<Func>(func))]
         (const std::string &key, auto ptr) {
             if constexpr (is_member_object_pointer_v<decltype(ptr)>) {
-                (get<0>(func_cap))(key, (get<0>(object_cap)).*ptr);
+                (get<1>(capture))(key, (get<0>(capture)).*ptr);
             }
         });
 
