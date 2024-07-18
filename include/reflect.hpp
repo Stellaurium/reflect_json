@@ -65,7 +65,8 @@ struct __reflect_trait {
     template <typename Func>
     static constexpr void for_each_member_ptr(Func &&func) {
         // 他说要加上 template，不然就报错了
-        // Use 'template' keyword to treat 'for_each_member_ptr' as a dependent template name
+        // Use 'template' keyword to treat 'for_each_member_ptr' as a dependent
+        // template name
         T::template for_each_member_ptr<T>(std::forward<Func>(func));
     }
 };
@@ -98,9 +99,10 @@ constexpr bool is_member_object_pointer_v = is_member_object_pointer<T>::value;
 //     T value;
 // };
 
-// object.*ptr的const与否 由object和ptr共同决定 有一方是const那么 解引用的结果就是const
-// 因为可以根据object是否为const 自动决定value是否为const
-// 因此我们不需要像v1.0一样 为const发愁，写很const和非const类型的 或者是 const cast
+// object.*ptr的const与否 由object和ptr共同决定 有一方是const那么
+// 解引用的结果就是const 因为可以根据object是否为const 自动决定value是否为const
+// 因此我们不需要像v1.0一样 为const发愁，写很const和非const类型的 或者是 const
+// cast
 
 // 不知道如何使用forward，为什么forward后只是按值捕获
 // 小彭 写的这个没问题
@@ -108,14 +110,17 @@ constexpr bool is_member_object_pointer_v = is_member_object_pointer<T>::value;
 // 直接之引用的方式也正确
 template <typename T, typename Func>
 void for_each_member(T &&object, Func &&func) {
-    //    _foreach_visitor<T, Func> visitor{std::forward<T>(object), std::forward<Func>(func)};
+    //    _foreach_visitor<T, Func> visitor{std::forward<T>(object),
+    //    std::forward<Func>(func)};
     //    __reflect_trait<std::decay_t<T>>::for_each_member_ptr(visitor);
 
-    // 奇怪的写法 https://stackoverflow.com/questions/26831382/capturing-perfectly-forwarded-variable-in-lambda
+    // 奇怪的写法
+    // https://stackoverflow.com/questions/26831382/capturing-perfectly-forwarded-variable-in-lambda
     __reflect_trait<std::decay_t<T>>::for_each_member_ptr(
-//        [object_cap = std::tuple<T>(std::forward<T>(object)), func_cap = std::tuple<Func>(std::forward<Func>(func))]
-        [capture = std::tuple<T,Func>(std::forward<T>(object),std::forward<Func>(func))]
-        (const std::string &key, auto ptr) {
+        //        [object_cap = std::tuple<T>(std::forward<T>(object)), func_cap
+        //        = std::tuple<Func>(std::forward<Func>(func))]
+        [capture = std::tuple<T, Func>(std::forward<T>(object), std::forward<Func>(func))]
+        (const std::string &key,auto ptr) {
             if constexpr (is_member_object_pointer_v<decltype(ptr)>) {
                 (get<1>(capture))(key, (get<0>(capture)).*ptr);
             }
@@ -123,8 +128,9 @@ void for_each_member(T &&object, Func &&func) {
 
     //    //     ERROR
     //    __reflect_trait<std::decay_t<T>>::for_each_member_ptr(
-    //        [object = std::forward<T>(object), func = std::forward<Func>(func)](const std::string &key, auto ptr) {
-    //        if constexpr (is_member_object_pointer_v<T>) {
+    //        [object = std::forward<T>(object), func =
+    //        std::forward<Func>(func)](const std::string &key, auto ptr) { if
+    //        constexpr (is_member_object_pointer_v<T>) {
     //            func(key, object.*ptr);
     //        }
     //        }

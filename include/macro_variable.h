@@ -3,21 +3,31 @@
 // 常量定义
 // 需要带一个尾巴 因为需要传入__PP_FOR_EACH_i在进行处理
 // 如果在外面的话 如果是逗号 就见当作分割符了
-#define PP_COMMA_SEPARATOR_IMPL ,
-#define PP_PLUS_SEPARATOR_IMPL +
-#define PP_MULTIPLY_SEPARATOR_IMPL *
-#define PP_SEMICOLON_SEPARATOR_IMPL ;
-#define PP_EMPTY_SEPARATOR_IMPL
+#define PP_COMMA_SEPARATOR
+#define PP_COMMA_SEPARATOR
+#define PP_PLUS_SEPARATOR
+#define PP_SEMICOLON_SEPARATOR
+#define PP_EMPTY_SEPARATOR
+#define __PP_COMMA_SEPARATOR_IMPL ,
+#define __PP_PLUS_SEPARATOR_IMPL +
+#define __PP_MULTIPLY_SEPARATOR_IMPL *
+#define __PP_SEMICOLON_SEPARATOR_IMPL ;
+#define __PP_EMPTY_SEPARATOR_IMPL
+
 
 // brackets 同样延迟解析
-#define PP_ROUND_BRACKETS_BEGIN (
-#define PP_ROUND_BRACKETS_END )
-#define PP_SQUARE_BRACKETS_BEGIN [
-#define PP_SQUARE_BRACKETS_END ]
-#define PP_CURLY_BRACKETS_BEGIN {
-#define PP_CURLY_BRACKETS_END }
-#define PP_ANGLE_BRACKETS_BEGIN <
-#define PP_ANGLE_BRACKETS_END >
+#define PP_ROUND_BRACKETS
+#define PP_SQUARE_BRACKETS
+#define PP_CURLY_BRACKETS
+#define PP_ANGLE_BRACKETS
+#define __PP_ROUND_BRACKETS_BEGIN (
+#define __PP_ROUND_BRACKETS_END )
+#define __PP_SQUARE_BRACKETS_BEGIN [
+#define __PP_SQUARE_BRACKETS_END ]
+#define __PP_CURLY_BRACKETS_BEGIN {
+#define __PP_CURLY_BRACKETS_END }
+#define __PP_ANGLE_BRACKETS_BEGIN <
+#define __PP_ANGLE_BRACKETS_END >
 
 #define REVERSE_64_NUMBER                                                                                              \
     64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37,    \
